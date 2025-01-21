@@ -5,13 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Language Translator</title>
     <link rel="stylesheet" href="style.css">
-    <script type="module" src="src/main.js"></script>
+    <script type="module" src="src/main.js" defer></script>
 </head>
 <body>
     <h1>Sign Language Translator</h1>
     <div class="translator-container">
-        <input type="text" id="textInput" placeholder="Enter text (e.g., 'hello')" />
-        <button id="translateButton">Translate</button>
+        <input 
+            type="text" 
+            id="textInput" 
+            placeholder="Enter text (e.g., 'hello' or a single letter)" 
+            aria-label="Enter text for translation" 
+        />
+        <button id="translateButton" aria-label="Translate text to sign video">Translate</button>
     </div>
     <div id="videoContainer">
         <video id="signVideo" controls autoplay></video>

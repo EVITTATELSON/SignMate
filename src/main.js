@@ -1,21 +1,26 @@
-// Map text inputs to video file paths
+// Generate videoMap for all alphabets and include "hello"
 const videoMap = {
-    "hello": "assets/videos/hello.mp4",
-    "thank you": "assets/videos/thank_you.mp4",
-    "please": "assets/videos/please.mp4"
+    "hello": "assets/videos/hello.mp4" // Specific mapping for "hello"
 };
 
-// Function to play the corresponding video
+const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+// Add video mappings for each letter
+alphabet.split("").forEach(letter => {
+    videoMap[letter] = `assets/videos/${letter}.mp4`;
+});
+
+// Function to play the corresponding video (case-insensitive input)
 function playVideo() {
-    const input = document.getElementById("textInput").value.toLowerCase().trim();
+    const input = document.getElementById("textInput").value.toLowerCase().trim(); // Normalize input
     const videoPath = videoMap[input];
 
     if (videoPath) {
         const videoElement = document.getElementById("signVideo");
-        videoElement.src = videoPath;
-        videoElement.play();
+        videoElement.src = videoPath; // Set the video source
+        videoElement.play(); // Play the video
     } else {
-        alert("No video found for the entered text. Try again!");
+        alert("No video found for the entered text. Please enter a single letter (A-Z) or 'hello'.");
     }
 }
 
