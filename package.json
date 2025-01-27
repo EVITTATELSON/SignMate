@@ -9,11 +9,13 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "express": "^4.21.2",
+    "ffmpeg-static": "^5.2.0",
     "three": "^0.172.0"
   },
   "devDependencies": {
     "live-server": "^1.2.0"
-  }
+  },
+  "description": ""
 }

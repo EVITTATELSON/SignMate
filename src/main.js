@@ -1,142 +1,86 @@
-/*// Generate videoMap for all alphabets and predefined words
 const videoMap = {
-    "hello": "assets/videos/hello.mp4" // Specific mapping for the word "hello"
+    "hello": "assets/videos/hello.mp4",
+    "a": "assets/videos/A.mp4",
+    "b": "assets/videos/B.mp4",
+    "c": "assets/videos/C.mp4",
+    "d": "assets/videos/D.mp4",
+    "e": "assets/videos/E.mp4",
+    "f": "assets/videos/F.mp4",
+    "g": "assets/videos/G.mp4",
+    "h": "assets/videos/H.mp4",
+    "apple": "assets/videos/apple.mp4", // Add the video for "apple"
+    "bus": "assets/videos/bus.mp4" // Add the video for "bus"
+    // Add other letters and words as needed
 };
 
-const alphabet = "abcdefghijklmnopqrstuvwxyz";
+// Translate input into a list of videos
+function getVideosFromInput(input) {
+    const words = input.split(" ");
+    const videoList = [];
+    let displayText = "";
 
-// Add video mappings for each letter
-alphabet.split("").forEach(letter => {
-    videoMap[letter] = `assets/videos/${letter}.mp4`;
-});
+    words.forEach((word) => {
+        if (videoMap[word]) {
+            videoList.push(videoMap[word]); // Add full word video
+            displayText += word + " "; // Add the word to display text
+        } else {
+            word.split("").forEach((letter) => {
+                if (videoMap[letter]) {
+                    videoList.push(videoMap[letter]); // Add letter videos
+                    displayText += letter + "-"; // Add letter with dash
+                }
+            });
+            // Remove the last dash for the current word
+            if (displayText.endsWith("-")) {
+                displayText = displayText.slice(0, -1);
+            }
+            displayText += " "; // Add space after the word
+        }
+    });
 
-// Function to play a sequence of videos
-function playSequence(input) {
-    const videoElement = document.getElementById("signVideo");
+    return { videoList, displayText: displayText.trim() }; // Return both video list and display text
+}
 
-    // Check if the input is a predefined word
-    if (videoMap[input]) {
-        videoElement.src = videoMap[input];
-        videoElement.play();
+// Request video stitching from the server
+async function stitchVideos(videoList) {
+    try {
+        const response = await fetch("/stitch", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ videos: videoList }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to stitch videos");
+        }
+
+        const data = await response.json(); // Assuming the server returns JSON
+        return data.url; // Adjust this based on your server response
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+// Play the stitched video
+document.getElementById("translateButton").addEventListener("click", async () => {
+    const input = document.getElementById("textInput").value.toLowerCase().trim();
+    if (!input) {
+        alert("Please enter some text.");
         return;
     }
 
-    // Split the input into individual letters and play each one sequentially
-    const letters = input.split("");
-    let index = 0;
+    const { videoList, displayText } = getVideosFromInput(input);
+    document.getElementById("displayText").innerText = displayText; // Display the formatted text
+    console.log("Video List:", videoList); // Log the video list for debugging
 
-    function playNext() {
-        if (index < letters.length) {
-            const letter = letters[index];
-            const videoPath = videoMap[letter];
+    const stitchedVideoUrl = await stitchVideos(videoList);
 
-            if (videoPath) {
-                videoElement.src = videoPath;
-                videoElement.play();
-                index++;
+    if (stitchedVideoUrl) {
+        const videoElement = document.getElementById("signVideo");
+        videoElement.src = stitchedVideoUrl;
 
-                // Play the next video when the current one ends
-                videoElement.onended = playNext;
-            } else {
-                alert(`No video found for the character: ${letter}`);
-                index++; // Skip to the next character
-                playNext(); // Call recursively
-            }
-        }
-    }
-
-    playNext(); // Start the sequence
-}
-
-// Event listener for the Translate button
-document.getElementById("translateButton").addEventListener("click", () => {
-    const input = document.getElementById("textInput").value.toLowerCase().trim();
-    if (/^[a-z]+$/.test(input)) {
-        playSequence(input); // Play the sequence for the entered text
-    } else {
-        alert("Please enter a valid word using letters A-Z only.");
-    }
-}); */
-
-
-
-// Generate videoMap for all alphabets and predefined words
-const videoMap = {
-    "hello": "assets/videos/hello.mp4" // Specific mapping for the word "hello"
-};
-
-const alphabet = "abcdefghijklmnopqrstuvwxyz";
-
-// Add video mappings for each letter
-alphabet.split("").forEach(letter => {
-    videoMap[letter] = `assets/videos/${letter}.mp4`;
-});
-
-// Function to play videos for a word
-function playWord(word, callback) {
-    const videoElement = document.getElementById("signVideo");
-
-    // Check if the word is predefined
-    if (videoMap[word]) {
-        videoElement.src = videoMap[word];
-        videoElement.play();
-
-        // Call the callback when the video ends
-        videoElement.onended = callback;
-    } else {
-        // Play videos for each letter in the word
-        const letters = word.split("");
-        let index = 0;
-
-        function playNext() {
-            if (index < letters.length) {
-                const letter = letters[index];
-                const videoPath = videoMap[letter];
-
-                if (videoPath) {
-                    videoElement.src = videoPath;
-                    videoElement.play();
-                    index++;
-
-                    // Play the next video when the current one ends
-                    videoElement.onended = playNext;
-                } else {
-                    alert(`No video found for the character: ${letter}`);
-                    index++; // Skip to the next character
-                    playNext(); // Call recursively
-                }
-            } else {
-                // Call the callback when all letters are played
-                callback();
-            }
-        }
-
-        playNext(); // Start the sequence
-    }
-}
-
-// Function to process the entire input
-function playSequence(input) {
-    const words = input.split(/\s+/); // Split the input into words
-    let wordIndex = 0;
-
-    function playNextWord() {
-        if (wordIndex < words.length) {
-            const word = words[wordIndex];
-            wordIndex++;
-            playWord(word, playNextWord); // Play the current word and move to the next
-        }
-    }
-
-    playNextWord(); // Start processing the words
-}
-
-// Event listener for the Translate button
-document.getElementById("translateButton").addEventListener("click", () => {
-    const input = document.getElementById("textInput").value.toLowerCase().trim();
-    if (/^[a-z\s]+$/.test(input)) {
-        playSequence(input); // Process the input
-    } else {
-        alert("Please enter valid words using letters A-Z and spaces only.");
+        // Force the video element to load the new source
+        videoElement.load(); // Load the new video source
+        videoElement.play(); // Play the new video
     }
 });
