@@ -1,3 +1,5 @@
+let lastVideoUrl = null; // Variable to store the last video URL
+
 const videoMap = {
     "hello": "assets/videos/hello.mp4",
     "a": "assets/videos/A.mp4",
@@ -41,6 +43,26 @@ function getVideosFromInput(input) {
     return { videoList, displayText: displayText.trim() }; // Return both video list and display text
 }
 
+// Request video deletion from the server
+async function deleteOldVideo(videoPath) {
+    try {
+        const response = await fetch("/delete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ videoPath }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete old video");
+        }
+
+        const data = await response.json();
+        console.log(data.message); // Log success message
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
 // Request video stitching from the server
 async function stitchVideos(videoList) {
     try {
@@ -55,7 +77,7 @@ async function stitchVideos(videoList) {
         }
 
         const data = await response.json(); // Assuming the server returns JSON
-        return data.url; // Adjust this based on your server response
+        return data.url; // Return the URL of the stitched video
     } catch (error) {
         console.error("Error:", error);
     }
@@ -73,6 +95,11 @@ document.getElementById("translateButton").addEventListener("click", async () =>
     document.getElementById("displayText").innerText = displayText; // Display the formatted text
     console.log("Video List:", videoList); // Log the video list for debugging
 
+    // Delete the old video if it exists
+    if (lastVideoUrl) {
+        await deleteOldVideo(lastVideoUrl);
+    }
+
     const stitchedVideoUrl = await stitchVideos(videoList);
 
     if (stitchedVideoUrl) {
@@ -82,5 +109,8 @@ document.getElementById("translateButton").addEventListener("click", async () =>
         // Force the video element to load the new source
         videoElement.load(); // Load the new video source
         videoElement.play(); // Play the new video
+
+        // Update the last video URL
+        lastVideoUrl = stitchedVideoUrl; // Store the new video URL
     }
 });
